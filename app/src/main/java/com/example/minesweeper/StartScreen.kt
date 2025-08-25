@@ -1,6 +1,5 @@
 package com.example.minesweeper
 
-import android.R.attr.fontWeight
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,14 +17,11 @@ import androidx.compose.ui.unit.sp
 // 開始畫面 Composable
 @Composable
 fun StartScreen(onStartGame: (length: Int, width: Int, mines: Int) -> Unit) {
-    //最大限制數量，因為手機沒辦法容納這麼多的格子
-    val maxCols = 12
-    val maxRows = 16
+    val maxCols = 30
+    val maxRows = 30
     val maxMines = 99
 
-
     Box(modifier = Modifier.fillMaxSize()) {
-
         // 背景圖片
         Image(
             painter = painterResource(id = R.drawable.main),
@@ -38,8 +34,10 @@ fun StartScreen(onStartGame: (length: Int, width: Int, mines: Int) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(55.dp)
+                .wrapContentHeight()
                 .align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             // 標題
             Text(
@@ -48,7 +46,7 @@ fun StartScreen(onStartGame: (length: Int, width: Int, mines: Int) -> Unit) {
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(80.dp))
 
             // 三個輸入框：長、寬、地雷數
             var lengthInput by remember { mutableStateOf("") }
@@ -57,33 +55,51 @@ fun StartScreen(onStartGame: (length: Int, width: Int, mines: Int) -> Unit) {
 
             TextField(
                 value = widthInput,
-                onValueChange = { widthInput = it },
-                label = { Text("介面寬度(Max: 20)") },
+                onValueChange = { input ->
+                    // 只允許數字輸入並限制最大值
+                    val value = input.filter { it.isDigit() }.take(2)
+                    if (value.isEmpty() || value.toIntOrNull()?.let { it <= maxCols } == true) {
+                        widthInput = value
+                    }
+                },
+                label = { Text("介面寬度(Max: $maxCols)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             TextField(
                 value = lengthInput,
-                onValueChange = { lengthInput = it },
-                label = { Text("介面長度(Max: 20)") },
+                onValueChange = { input ->
+                    // 只允許數字輸入並限制最大值
+                    val value = input.filter { it.isDigit() }.take(2)
+                    if (value.isEmpty() || value.toIntOrNull()?.let { it <= maxRows } == true) {
+                        lengthInput = value
+                    }
+                },
+                label = { Text("介面長度(Max: $maxRows)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             TextField(
                 value = minesInput,
-                onValueChange = { minesInput = it },
-                label = { Text("地雷數量(Max: 99)") },
+                onValueChange = { input ->
+                    // 只允許數字輸入並限制最大值
+                    val value = input.filter { it.isDigit() }.take(2)
+                    if (value.isEmpty() || value.toIntOrNull()?.let { it <= maxMines } == true) {
+                        minesInput = value
+                    }
+                },
+                label = { Text("地雷數量(Max: $maxMines)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(110.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             // Start Game 按鈕
             Button(
@@ -91,16 +107,30 @@ fun StartScreen(onStartGame: (length: Int, width: Int, mines: Int) -> Unit) {
                     val length = lengthInput.toIntOrNull() ?: 0
                     val width = widthInput.toIntOrNull() ?: 0
                     val mines = minesInput.toIntOrNull() ?: 0
-                    onStartGame(length, width, mines) // 將數據傳給 MainActivity
+
+                    // 驗證輸入值
+                    if (length > 0 && width > 0 && mines > 0 &&
+                        length <= maxRows && width <= maxCols &&
+                        mines <= maxMines && mines < length * width) {
+                        onStartGame(length, width, mines)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 80.dp, max = 100.dp)
+                    .height(70.dp),
+                enabled = run {
+                    val length = lengthInput.toIntOrNull() ?: 0
+                    val width = widthInput.toIntOrNull() ?: 0
+                    val mines = minesInput.toIntOrNull() ?: 0
+                    length > 0 && width > 0 && mines > 0 &&
+                            length <= maxRows && width <= maxCols &&
+                            mines <= maxMines && mines < length * width
+                }
             ) {
                 Text(
                     "Start Game!",
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Normal
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }

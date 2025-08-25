@@ -1,8 +1,5 @@
 package com.example.minesweeper.model
 
-// defined data structure about Cell
-// Bomb yes or not, display or not, flag do or undo
-
 data class Cell(
     val row: Int,
     val col: Int,
